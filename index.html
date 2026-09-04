@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFL Stats & League Leaderboard Hub</title>
+    <title>NFL Stats & Multi-Stat Leaderboard Hub (2000-2026)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -46,7 +46,7 @@
         }
 
         .nav-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -175,7 +175,7 @@
         }
 
         main {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 2rem auto;
             padding: 0 1rem;
             flex: 1;
@@ -287,20 +287,20 @@
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         th {
-            background-color: rgba(0, 0, 0, 0.2);
+            background-color: rgba(0, 0, 0, 0.3);
             color: var(--text-muted);
-            font-weight: 600;
-            padding: 0.75rem 1rem;
+            font-weight: 700;
+            padding: 0.75rem 0.8rem;
             border-bottom: 1px solid var(--border-color);
             white-space: nowrap;
         }
 
         td {
-            padding: 0.75rem 1rem;
+            padding: 0.75rem 0.8rem;
             border-bottom: 1px solid var(--border-color);
             white-space: nowrap;
         }
@@ -320,7 +320,7 @@
         .rank-badge {
             font-weight: 700;
             color: var(--accent-blue);
-            width: 30px;
+            width: 24px;
             display: inline-block;
         }
 
@@ -364,47 +364,46 @@
     </header>
 
     <main>
+        <!-- LEAGUE LEADERS & FULL STAT RANKINGS VIEW -->
         <div id="leagueView" class="view-section active">
             <div class="controls-bar">
                 <div class="control-group">
                     <label for="seasonSelect">Season Year:</label>
                     <select id="seasonSelect" onchange="loadLeagueLeaders()">
-                        </select>
+                        <!-- Dynamic 2000-2026 options generated via JS -->
+                    </select>
                 </div>
                 <div class="control-group">
-                    <label for="positionSelect">Position / Category:</label>
+                    <label for="positionSelect">Position Group:</label>
                     <select id="positionSelect" onchange="loadLeagueLeaders()">
                         <option value="passing">Passing Leaders (QB)</option>
-                        <option value="rushing">Rushing Leaders (RB)</option>
-                        <option value="receiving">Receiving Leaders (WR/TE)</option>
-                        <option value="defensive">Defensive Leaders (Tackles/Sacks)</option>
-                        <option value="interceptions">Interception Leaders (DB)</option>
+                        <option value="rushing">Rushing Leaders (RB/QB)</option>
+                        <option value="receiving">Receiving Leaders (WR/TE/RB)</option>
+                        <option value="defensive">Defensive Leaders (Tackles & Sacks)</option>
+                        <option value="interceptions">Interceptions Leaders (DB/LB)</option>
                     </select>
                 </div>
             </div>
 
             <div class="section-title">
-                <span id="leaderboardTitle">2026 League Passing Leaders</span>
+                <span id="leaderboardTitle">2026 NFL Passing Leaders</span>
             </div>
 
             <div class="table-container">
                 <table>
                     <thead>
                         <tr id="leaderHeader">
-                            <th>RK</th>
-                            <th>PLAYER</th>
-                            <th>POS</th>
-                            <th>TEAM</th>
-                            <th>STAT VALUE</th>
+                            <!-- Dynamic Table Headers based on position -->
                         </tr>
                     </thead>
                     <tbody id="leaderBody">
-                        <tr><td colspan="5" class="loading">Loading league leaders...</td></tr>
+                        <tr><td colspan="12" class="loading">Loading league leaders...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
+        <!-- INDIVIDUAL PLAYER VIEW -->
         <div id="playerView" class="view-section">
             <div class="player-card" id="playerCard">
                 <img src="https://a.espncdn.com/i/headshots/nfl/players/full/3139477.png" alt="Player Headshot" class="player-headshot" id="playerHeadshot">
@@ -423,7 +422,7 @@
             </div>
 
             <div class="section-title">
-                <span>2026 Season Game Log</span>
+                <span>2026 Game Log</span>
             </div>
             <div class="table-container">
                 <table>
@@ -434,13 +433,14 @@
                             <th>RESULT</th>
                             <th>CMP/ATT</th>
                             <th>YDS</th>
+                            <th>CMP%</th>
                             <th>TD</th>
                             <th>INT</th>
                             <th>RATING</th>
                         </tr>
                     </thead>
                     <tbody id="gamelogBody">
-                        <tr><td colspan="8" class="loading">Loading live 2026 stats...</td></tr>
+                        <tr><td colspan="9" class="loading">Loading live 2026 stats...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -457,13 +457,14 @@
                             <th>GP</th>
                             <th>CMP/ATT</th>
                             <th>YDS</th>
+                            <th>CMP%</th>
                             <th>TD</th>
                             <th>INT</th>
                             <th>RATING</th>
                         </tr>
                     </thead>
                     <tbody id="careerBody">
-                        <tr><td colspan="8" class="loading">Loading career statistics...</td></tr>
+                        <tr><td colspan="9" class="loading">Loading career statistics...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -476,6 +477,95 @@
 
     <script>
         let currentAthleteId = "3139477"; // Default: Patrick Mahomes
+
+        // Schema definitions for complete positional stat columns
+        const positionSchemas = {
+            passing: {
+                headers: ["RK", "PLAYER", "TEAM", "POS", "CMP", "ATT", "CMP%", "YDS", "AVG", "TD", "INT", "LNG", "FUM", "QBR"],
+                renderRow: (item, idx, athlete) => `
+                    <td><span class="rank-badge">${idx + 1}</span></td>
+                    <td><strong>${athlete.displayName}</strong></td>
+                    <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
+                    <td>${athlete.position ? athlete.position.abbreviation : 'QB'}</td>
+                    <td>${item.stats?.cmp || item.stats?.[0] || '-'}</td>
+                    <td>${item.stats?.att || item.stats?.[1] || '-'}</td>
+                    <td>${item.stats?.cmpPct || item.stats?.[2] || '-'}</td>
+                    <td><strong>${item.stats?.yds || item.displayValue || '-'}</strong></td>
+                    <td>${item.stats?.avg || '-'}</td>
+                    <td>${item.stats?.td || '-'}</td>
+                    <td>${item.stats?.int || '-'}</td>
+                    <td>${item.stats?.lng || '-'}</td>
+                    <td>${item.stats?.fum || '0'}</td>
+                    <td>${item.stats?.rating || '-'}</td>
+                `
+            },
+            rushing: {
+                headers: ["RK", "PLAYER", "TEAM", "POS", "ATT", "YDS", "AVG", "TD", "LNG", "FUM", "FUM-LOST", "YDS/G"],
+                renderRow: (item, idx, athlete) => `
+                    <td><span class="rank-badge">${idx + 1}</span></td>
+                    <td><strong>${athlete.displayName}</strong></td>
+                    <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
+                    <td>${athlete.position ? athlete.position.abbreviation : 'RB'}</td>
+                    <td>${item.stats?.att || '-'}</td>
+                    <td><strong>${item.stats?.yds || item.displayValue || '-'}</strong></td>
+                    <td>${item.stats?.avg || '-'}</td>
+                    <td>${item.stats?.td || '-'}</td>
+                    <td>${item.stats?.lng || '-'}</td>
+                    <td>${item.stats?.fum || '0'}</td>
+                    <td>${item.stats?.lst || '0'}</td>
+                    <td>${item.stats?.ypg || '-'}</td>
+                `
+            },
+            receiving: {
+                headers: ["RK", "PLAYER", "TEAM", "POS", "REC", "TGTS", "YDS", "AVG", "TD", "LNG", "FUM", "YDS/G"],
+                renderRow: (item, idx, athlete) => `
+                    <td><span class="rank-badge">${idx + 1}</span></td>
+                    <td><strong>${athlete.displayName}</strong></td>
+                    <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
+                    <td>${athlete.position ? athlete.position.abbreviation : 'WR'}</td>
+                    <td>${item.stats?.rec || '-'}</td>
+                    <td>${item.stats?.tgts || '-'}</td>
+                    <td><strong>${item.stats?.yds || item.displayValue || '-'}</strong></td>
+                    <td>${item.stats?.avg || '-'}</td>
+                    <td>${item.stats?.td || '-'}</td>
+                    <td>${item.stats?.lng || '-'}</td>
+                    <td>${item.stats?.fum || '0'}</td>
+                    <td>${item.stats?.ypg || '-'}</td>
+                `
+            },
+            defensive: {
+                headers: ["RK", "PLAYER", "TEAM", "POS", "TOT TAC", "SOLO", "AST", "SACK", "TFL", "QB HITS", "FF", "FR"],
+                renderRow: (item, idx, athlete) => `
+                    <td><span class="rank-badge">${idx + 1}</span></td>
+                    <td><strong>${athlete.displayName}</strong></td>
+                    <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
+                    <td>${athlete.position ? athlete.position.abbreviation : 'LB'}</td>
+                    <td><strong>${item.stats?.tot || item.displayValue || '-'}</strong></td>
+                    <td>${item.stats?.solo || '-'}</td>
+                    <td>${item.stats?.ast || '-'}</td>
+                    <td>${item.stats?.sack || '-'}</td>
+                    <td>${item.stats?.tfl || '-'}</td>
+                    <td>${item.stats?.qbh || '-'}</td>
+                    <td>${item.stats?.ff || '0'}</td>
+                    <td>${item.stats?.fr || '0'}</td>
+                `
+            },
+            interceptions: {
+                headers: ["RK", "PLAYER", "TEAM", "POS", "INT", "YDS", "TD", "LNG", "PD", "FF"],
+                renderRow: (item, idx, athlete) => `
+                    <td><span class="rank-badge">${idx + 1}</span></td>
+                    <td><strong>${athlete.displayName}</strong></td>
+                    <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
+                    <td>${athlete.position ? athlete.position.abbreviation : 'DB'}</td>
+                    <td><strong>${item.stats?.int || item.displayValue || '-'}</strong></td>
+                    <td>${item.stats?.yds || '-'}</td>
+                    <td>${item.stats?.td || '-'}</td>
+                    <td>${item.stats?.lng || '-'}</td>
+                    <td>${item.stats?.pd || '-'}</td>
+                    <td>${item.stats?.ff || '0'}</td>
+                `
+            }
+        };
 
         // Populate Season Selector (2000 to 2026)
         const seasonSelect = document.getElementById('seasonSelect');
@@ -548,29 +638,34 @@
             }
         });
 
-        // Load League Leaders
+        // Load League Leaders with Dynamic Stat Categories
         async function loadLeagueLeaders() {
             const year = document.getElementById('seasonSelect').value;
             const posCategory = document.getElementById('positionSelect').value;
+            const theadTr = document.getElementById('leaderHeader');
             const tbody = document.getElementById('leaderBody');
             
+            const schema = positionSchemas[posCategory] || positionSchemas.passing;
+
+            // Render headers dynamically based on position category
+            theadTr.innerHTML = schema.headers.map(h => `<th>${h}</th>`).join('');
+
             const posText = document.getElementById('positionSelect').options[document.getElementById('positionSelect').selectedIndex].text;
             document.getElementById('leaderboardTitle').textContent = `${year} NFL ${posText}`;
-            tbody.innerHTML = '<tr><td colspan="5" class="loading">Fetching league standings...</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="${schema.headers.length}" class="loading">Fetching ${year} stat leaders...</td></tr>`;
 
             try {
                 const res = await fetch(`https://site.api.espn.com/apis/site/v3/sports/football/nfl/leaders?season=${year}`);
                 const data = await res.json();
 
                 if (!data.leaders) {
-                    tbody.innerHTML = '<tr><td colspan="5">No leader data available for this season.</td></tr>';
+                    tbody.innerHTML = `<tr><td colspan="${schema.headers.length}">No leader data available for ${year}.</td></tr>`;
                     return;
                 }
 
-                // Match category split
                 let categoryData = data.leaders.categories.find(c => c.name.toLowerCase().includes(posCategory));
                 if (!categoryData) {
-                    categoryData = data.leaders.categories[0]; // Fallback to first available category
+                    categoryData = data.leaders.categories[0];
                 }
 
                 tbody.innerHTML = '';
@@ -578,13 +673,8 @@
                     const athlete = item.athlete;
                     const tr = document.createElement('tr');
                     tr.className = 'clickable-row';
-                    tr.innerHTML = `
-                        <td><span class="rank-badge">${index + 1}</span></td>
-                        <td><strong>${athlete.displayName}</strong></td>
-                        <td>${athlete.position ? athlete.position.abbreviation : '-'}</td>
-                        <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
-                        <td><strong>${item.displayValue}</strong></td>
-                    `;
+                    tr.innerHTML = schema.renderRow(item, index, athlete);
+                    
                     tr.addEventListener('click', () => {
                         currentAthleteId = athlete.id;
                         loadPlayerData(athlete.id);
@@ -593,11 +683,11 @@
                     tbody.appendChild(tr);
                 });
             } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="5">Unable to load league leaders for the selected season.</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="${schema.headers.length}">Unable to load league leaders for the selected season.</td></tr>`;
             }
         }
 
-        // Load Individual Athlete Header & Bio Data
+        // Load Athlete Profile Data
         async function loadPlayerData(athleteId) {
             try {
                 const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/athletes/${athleteId}`);
@@ -621,14 +711,14 @@
         // Fetch 2026 Game Log
         async function fetchPlayerGamelog(athleteId = currentAthleteId) {
             const tbody = document.getElementById('gamelogBody');
-            tbody.innerHTML = '<tr><td colspan="8" class="loading">Fetching live 2026 game logs...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="loading">Fetching live game logs...</td></tr>';
 
             try {
                 const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/athletes/${athleteId}/gamelog`);
                 const data = await res.json();
 
                 if (!data.events || data.events.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8">No 2026 game data recorded yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="9">No 2026 game data recorded yet.</td></tr>';
                     return;
                 }
 
@@ -642,21 +732,22 @@
                         <td>${event.gameResult || '-'} ${event.score || ''}</td>
                         <td>${stats[0] || '-'}</td>
                         <td>${stats[1] || '-'}</td>
-                        <td>${stats[2] || '-'}</td>
+                        <td>${stats[2] || '-'}%</td>
                         <td>${stats[3] || '-'}</td>
                         <td>${stats[4] || '-'}</td>
+                        <td>${stats[5] || '-'}</td>
                     `;
                     tbody.appendChild(tr);
                 });
             } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="8">Unable to fetch live game logs.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9">Unable to fetch live game logs.</td></tr>';
             }
         }
 
-        // Fetch Full Career Stats
+        // Fetch Full Career Stats with Team Tracking
         async function fetchPlayerCareer(athleteId = currentAthleteId) {
             const tbody = document.getElementById('careerBody');
-            tbody.innerHTML = '<tr><td colspan="8" class="loading">Loading career stats...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="loading">Loading career stats...</td></tr>';
 
             try {
                 const res = await fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/athletes/${athleteId}/statistics`);
@@ -672,21 +763,22 @@
                             <td>${season.stats ? season.stats[0] : '-'}</td>
                             <td>${season.stats ? season.stats[1] : '-'}</td>
                             <td>${season.stats ? season.stats[2] : '-'}</td>
-                            <td>${season.stats ? season.stats[3] : '-'}</td>
+                            <td>${season.stats ? season.stats[3] : '-'}%</td>
                             <td>${season.stats ? season.stats[4] : '-'}</td>
                             <td>${season.stats ? season.stats[5] : '-'}</td>
+                            <td>${season.stats ? season.stats[6] : '-'}</td>
                         `;
                         tbody.appendChild(tr);
                     });
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="8">No detailed career records available for this profile.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="9">No detailed career records available for this profile.</td></tr>';
                 }
             } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="8">Career statistics currently unavailable.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9">Career statistics currently unavailable.</td></tr>';
             }
         }
 
-        // Initialize App with League Leaders & Default Player Data
+        // Initialize App
         loadLeagueLeaders();
         loadPlayerData(currentAthleteId);
     </script>
