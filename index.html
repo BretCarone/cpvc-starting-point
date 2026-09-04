@@ -1,155 +1,514 @@
 <!DOCTYPE html>
-<!--
-  ================================================================
-  READ THIS BEFORE YOU PASTE ANYTHING
-
-  When Gemini gives you a page, you do NOT paste it into a part of
-  this file. You replace the entire file.
-
-  Click into the editor, press Ctrl+A (Cmd+A on Mac), press Delete,
-  then paste. Everything here is meant to be thrown away.
-
-  Do that only AFTER your live link works. Get the link first.
-  ================================================================
--->
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My first site</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Unbounded:wght@600;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --navy: #0d1d30;
-    --card: #142a44;
-    --line: #27466a;
-    --aqua: #6de1d7;
-    --text: #ffffff;
-    --muted: #94a9bf;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--navy);
-    color: var(--text);
-    font-family: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
-    line-height: 1.6;
-    display: flex;
-    justify-content: center;
-    padding: 6vh 20px;
-  }
-  main { width: 100%; max-width: 640px; }
-  .badge {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--aqua);
-    margin-bottom: 18px;
-  }
-  h1 {
-    font-family: "Unbounded", "Manrope", sans-serif;
-    font-weight: 800;
-    font-size: clamp(38px, 9vw, 68px);
-    letter-spacing: -0.05em;
-    line-height: 1.02;
-    margin: 0 0 8px;
-  }
-  .name {
-    font-family: "Unbounded", "Manrope", sans-serif;
-    font-weight: 600;
-    font-size: clamp(18px, 4vw, 24px);
-    letter-spacing: -0.04em;
-    color: var(--aqua);
-    margin: 0 0 24px;
-  }
-  p.lead { font-size: 18px; color: var(--muted); margin: 0 0 34px; }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 26px 28px;
-    margin-bottom: 18px;
-  }
-  .card h2 {
-    font-family: "Unbounded", "Manrope", sans-serif;
-    font-weight: 600;
-    font-size: 15px;
-    letter-spacing: -0.03em;
-    text-transform: uppercase;
-    color: var(--aqua);
-    margin: 0 0 16px;
-  }
-  ol { margin: 0; padding-left: 20px; }
-  li { margin-bottom: 12px; color: var(--muted); }
-  li:last-child { margin-bottom: 0; }
-  li b { color: var(--text); font-weight: 700; }
-  code {
-    font-family: ui-monospace, "SF Mono", Consolas, monospace;
-    font-size: 0.92em;
-    background: #0a1727;
-    border: 1px solid var(--line);
-    border-radius: 5px;
-    padding: 1px 6px;
-    color: var(--aqua);
-  }
-  a { color: var(--aqua); }
-  footer {
-    margin-top: 30px;
-    font-size: 14px;
-    color: #6e839a;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL Player Stats & Live Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --border-color: #334155;
+            --font-family: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            color: #fff;
+        }
+
+        .logo span {
+            color: var(--accent-red);
+        }
+
+        .live-badge {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .live-pulse {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-red);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-base);
+            color: #fff;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 200;
+            display: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        .search-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-item:hover {
+            background-color: var(--bg-hover);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        .player-card {
+            background-color: var(--bg-card);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .player-headshot {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: var(--bg-base);
+            border: 3px solid var(--accent-blue);
+        }
+
+        .player-info h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .player-details {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-container {
+            background-color: var(--bg-card);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: var(--bg-hover);
+        }
+
+        .season-highlight {
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        footer {
+            background-color: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+
+        .btn-toggle {
+            background-color: var(--bg-hover);
+            color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: inherit;
+        }
+
+        .btn-toggle:hover {
+            background-color: var(--border-color);
+        }
+
+        .loading {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
-<main>
 
-  <span class="badge">Cal Poly Vibe Coding &middot; Session 01</span>
+    <header>
+        <div class="nav-container">
+            <div class="logo">
+                <span>NFL</span> STAT CENTRAL
+                <div class="live-badge">
+                    <div class="live-pulse"></div> 2026 LIVE UPDATES
+                </div>
+            </div>
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search NFL player (e.g. Mahomes, Jefferson)..." autocomplete="off">
+                <div id="searchResults" class="search-results"></div>
+            </div>
+        </div>
+    </header>
 
-  <h1>It&rsquo;s live.</h1>
+    <main>
+        <div class="player-card" id="playerCard">
+            <img src="https://a.espncdn.com/i/headshots/nfl/players/full/3139477.png" alt="Player Headshot" class="player-headshot" id="playerHeadshot">
+            <div class="player-info">
+                <h1 id="playerName">Patrick Mahomes</h1>
+                <div class="player-details">
+                    <span id="playerTeam">Kansas City Chiefs</span>
+                    <span>•</span>
+                    <span id="playerPosition">QB</span>
+                    <span>•</span>
+                    <span id="playerNum">#15</span>
+                    <span>•</span>
+                    <span id="playerBio">Age: 30 | 6'2", 225 lbs</span>
+                </div>
+            </div>
+        </div>
 
-  <!-- Step 5: change the name below to yours, then commit. -->
-  <p class="name">Built by Bret Carone</p>
+        <div class="section-title">
+            <span>2026 Season Game Log</span>
+            <button class="btn-toggle" onclick="fetchPlayerGamelog()">Refresh Live Data</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr id="gamelogHeader">
+                        <th>DATE</th>
+                        <th>OPP</th>
+                        <th>RESULT</th>
+                        <th>CMP/ATT</th>
+                        <th>YDS</th>
+                        <th>TD</th>
+                        <th>INT</th>
+                        <th>RATING</th>
+                    </tr>
+                </thead>
+                <tbody id="gamelogBody">
+                    <tr><td colspan="8" class="loading">Loading live 2026 stats...</td></tr>
+                </tbody>
+            </table>
+        </div>
 
-  <p class="lead">
-    This page is on the internet. Anyone you send this link to can open it,
-    on any device, right now. You made that happen in about five minutes.
-  </p>
+        <div class="section-title">
+            <span>Career Statistics</span>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr id="careerHeader">
+                        <th>YEAR</th>
+                        <th>TEAM</th>
+                        <th>GP</th>
+                        <th>CMP/ATT</th>
+                        <th>YDS</th>
+                        <th>TD</th>
+                        <th>INT</th>
+                        <th>RATING</th>
+                    </tr>
+                </thead>
+                <tbody id="careerBody">
+                    <tr><td colspan="8" class="loading">Loading career statistics...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
 
-  <div class="card">
-    <h2>Three things, in this order</h2>
-    <ol>
-      <li><b>Put your name on it.</b> Edit <code>index.html</code>, change
-        YOUR NAME HERE above, commit, refresh this page.</li>
-      <li><b>Submit this link.</b> Go to
-        <a href="https://www.calpolyvibecoding.com/">calpolyvibecoding.com</a>,
-        make an account, and paste this URL in. That is how you get counted,
-        and how Claude seats get assigned.</li>
-      <li><b>Then build.</b> Open Gemini, get a page, and replace this entire
-        file with it.</li>
-    </ol>
-  </div>
+    <footer>
+        <p>Live 2026 NFL Data powered by ESPN Public API. Data refreshes automatically.</p>
+    </footer>
 
-  <div class="card">
-    <h2>How to replace this page</h2>
-    <ol>
-      <li>Copy what Gemini gives you with the <b>copy button</b> on the code
-        block. Do not click and drag.</li>
-      <li>Open <code>index.html</code> here and click the pencil icon.</li>
-      <li><b>Ctrl+A</b> (<b>Cmd+A</b> on Mac), then <b>Delete</b>. All of it.
-        Yes, really.</li>
-      <li>Paste, commit, refresh.</li>
-    </ol>
-  </div>
+    <script>
+        let currentAthleteId = "3139477"; // Default: Patrick Mahomes
 
-  <footer>
-    Nothing on this page is precious. It exists so the link has something to
-    show before you have something of your own.
-  </footer>
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
 
-</main>
+        // Search Autocomplete using ESPN Search API
+        searchInput.addEventListener('input', async (e) => {
+            const query = e.target.value.trim();
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            try {
+                const res = await fetch(`https://site.web.api.espn.com/apis/search/v2?query=${encodeURIComponent(query)}&limit=5&type=player&sport=football&league=nfl`);
+                const data = await res.json();
+                
+                searchResults.innerHTML = '';
+                if (data.results && data.results[0] && data.results[0].contents) {
+                    const items = data.results[0].contents;
+                    items.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'search-item';
+                        div.innerHTML = `
+                            <span><strong>${item.displayName}</strong> (${item.description || 'NFL'})</span>
+                            <small style="color: var(--text-muted);">${item.team || ''}</small>
+                        `;
+                        div.addEventListener('click', () => {
+                            currentAthleteId = item.id;
+                            loadPlayerData(currentAthleteId);
+                            searchResults.style.display = 'none';
+                            searchInput.value = '';
+                        });
+                        searchResults.appendChild(div);
+                    });
+                    searchResults.style.display = 'block';
+                } else {
+                    searchResults.style.display = 'none';
+                }
+            } catch (err) {
+                console.error("Search error:", err);
+            }
+        });
+
+        // Hide search results on outside click
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        // Load Header & Bio Data
+        async function loadPlayerData(athleteId) {
+            try {
+                const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/athletes/${athleteId}`);
+                const data = await res.json();
+                const athlete = data.athlete;
+
+                document.getElementById('playerName').textContent = athlete.displayName;
+                document.getElementById('playerHeadshot').src = athlete.headshot ? athlete.headshot.href : 'https://a.espncdn.com/i/headshots/nfl/players/full/default.png';
+                document.getElementById('playerTeam').textContent = athlete.team ? athlete.team.displayName : 'Free Agent';
+                document.getElementById('playerPosition').textContent = athlete.position ? athlete.position.abbreviation : 'N/A';
+                document.getElementById('playerNum').textContent = athlete.jersey ? `#${athlete.jersey}` : '';
+                document.getElementById('playerBio').textContent = `Age: ${athlete.age || 'N/A'} | ${athlete.displayHeight || ''}, ${athlete.displayWeight || ''}`;
+
+                fetchPlayerGamelog(athleteId);
+                fetchPlayerCareer(athleteId);
+            } catch (err) {
+                console.error("Error loading athlete info:", err);
+            }
+        }
+
+        // Fetch 2026 Game Log
+        async function fetchPlayerGamelog(athleteId = currentAthleteId) {
+            const tbody = document.getElementById('gamelogBody');
+            tbody.innerHTML = '<tr><td colspan="8" class="loading">Fetching live 2026 game logs...</td></tr>';
+
+            try {
+                const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/athletes/${athleteId}/gamelog`);
+                const data = await res.json();
+
+                if (!data.events || data.events.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8">No 2026 game data recorded yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                data.events.forEach(event => {
+                    const tr = document.createElement('tr');
+                    const stats = event.stats || [];
+                    tr.innerHTML = `
+                        <td>${new Date(event.gameDate).toLocaleDateString()}</td>
+                        <td>${event.opponent.abbreviation}</td>
+                        <td>${event.gameResult || '-'} ${event.score || ''}</td>
+                        <td>${stats[0] || '-'}</td>
+                        <td>${stats[1] || '-'}</td>
+                        <td>${stats[2] || '-'}</td>
+                        <td>${stats[3] || '-'}</td>
+                        <td>${stats[4] || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="8">Unable to fetch live game logs.</td></tr>';
+            }
+        }
+
+        // Fetch Full Career Stats
+        async function fetchPlayerCareer(athleteId = currentAthleteId) {
+            const tbody = document.getElementById('careerBody');
+            tbody.innerHTML = '<tr><td colspan="8" class="loading">Loading career stats...</td></tr>';
+
+            try {
+                const res = await fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/athletes/${athleteId}/statistics`);
+                const data = await res.json();
+
+                tbody.innerHTML = '';
+                if (data.splits && data.splits.categories) {
+                    const generalStats = data.splits.categories.find(c => c.name === 'passing' || c.name === 'rushing' || c.name === 'receiving');
+                    
+                    if (data.splits.seasons) {
+                        data.splits.seasons.forEach(season => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td class="season-highlight">${season.year}</td>
+                                <td>${season.team ? season.team.displayName : 'NFL'}</td>
+                                <td>${season.stats ? season.stats[0] : '-'}</td>
+                                <td>${season.stats ? season.stats[1] : '-'}</td>
+                                <td>${season.stats ? season.stats[2] : '-'}</td>
+                                <td>${season.stats ? season.stats[3] : '-'}</td>
+                                <td>${season.stats ? season.stats[4] : '-'}</td>
+                                <td>${season.stats ? season.stats[5] : '-'}</td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="8">Career stats summarized for primary role.</td></tr>';
+                    }
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8">No detailed career records available.</td></tr>';
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="8">Career statistics currently unavailable.</td></tr>';
+            }
+        }
+
+        // Initialize with default player
+        loadPlayerData(currentAthleteId);
+    </script>
 </body>
 </html>
