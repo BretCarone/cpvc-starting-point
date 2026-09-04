@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFL Player Stats & Live Hub</title>
+    <title>NFL Stats & League Leaderboard Hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -99,7 +99,7 @@
         .search-container {
             position: relative;
             flex: 1;
-            max-width: 400px;
+            max-width: 350px;
         }
 
         .search-input {
@@ -147,12 +147,47 @@
             background-color: var(--bg-hover);
         }
 
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background-color: var(--bg-base);
+            padding: 0.25rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background-color: var(--bg-hover);
+            color: var(--text-main);
+        }
+
         main {
             max-width: 1200px;
             margin: 2rem auto;
             padding: 0 1rem;
             flex: 1;
             width: 100%;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
         }
 
         .player-card {
@@ -189,6 +224,46 @@
             font-size: 0.9rem;
             flex-wrap: wrap;
             margin-top: 0.5rem;
+        }
+
+        .controls-bar {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        select {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-family: inherit;
+            font-size: 0.875rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        select:focus {
+            border-color: var(--accent-blue);
         }
 
         .section-title {
@@ -238,9 +313,15 @@
             background-color: var(--bg-hover);
         }
 
-        .season-highlight {
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .rank-badge {
             font-weight: 700;
             color: var(--accent-blue);
+            width: 30px;
+            display: inline-block;
         }
 
         footer {
@@ -251,21 +332,6 @@
             color: var(--text-muted);
             font-size: 0.85rem;
             margin-top: auto;
-        }
-
-        .btn-toggle {
-            background-color: var(--bg-hover);
-            color: #fff;
-            border: 1px solid var(--border-color);
-            padding: 0.4rem 0.8rem;
-            border-radius: 0.375rem;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-family: inherit;
-        }
-
-        .btn-toggle:hover {
-            background-color: var(--border-color);
         }
 
         .loading {
@@ -284,89 +350,159 @@
                     <div class="live-pulse"></div> 2026 LIVE UPDATES
                 </div>
             </div>
+
+            <div class="nav-tabs">
+                <button class="tab-btn active" onclick="switchView('leagueView')">League Leaders</button>
+                <button class="tab-btn" onclick="switchView('playerView')">Player Profile</button>
+            </div>
+
             <div class="search-container">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search NFL player (e.g. Mahomes, Jefferson)..." autocomplete="off">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search player (e.g. Mahomes, Jefferson)..." autocomplete="off">
                 <div id="searchResults" class="search-results"></div>
             </div>
         </div>
     </header>
 
     <main>
-        <div class="player-card" id="playerCard">
-            <img src="https://a.espncdn.com/i/headshots/nfl/players/full/3139477.png" alt="Player Headshot" class="player-headshot" id="playerHeadshot">
-            <div class="player-info">
-                <h1 id="playerName">Patrick Mahomes</h1>
-                <div class="player-details">
-                    <span id="playerTeam">Kansas City Chiefs</span>
-                    <span>•</span>
-                    <span id="playerPosition">QB</span>
-                    <span>•</span>
-                    <span id="playerNum">#15</span>
-                    <span>•</span>
-                    <span id="playerBio">Age: 30 | 6'2", 225 lbs</span>
+        <div id="leagueView" class="view-section active">
+            <div class="controls-bar">
+                <div class="control-group">
+                    <label for="seasonSelect">Season Year:</label>
+                    <select id="seasonSelect" onchange="loadLeagueLeaders()">
+                        </select>
                 </div>
+                <div class="control-group">
+                    <label for="positionSelect">Position / Category:</label>
+                    <select id="positionSelect" onchange="loadLeagueLeaders()">
+                        <option value="passing">Passing Leaders (QB)</option>
+                        <option value="rushing">Rushing Leaders (RB)</option>
+                        <option value="receiving">Receiving Leaders (WR/TE)</option>
+                        <option value="defensive">Defensive Leaders (Tackles/Sacks)</option>
+                        <option value="interceptions">Interception Leaders (DB)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <span id="leaderboardTitle">2026 League Passing Leaders</span>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr id="leaderHeader">
+                            <th>RK</th>
+                            <th>PLAYER</th>
+                            <th>POS</th>
+                            <th>TEAM</th>
+                            <th>STAT VALUE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderBody">
+                        <tr><td colspan="5" class="loading">Loading league leaders...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="section-title">
-            <span>2026 Season Game Log</span>
-            <button class="btn-toggle" onclick="fetchPlayerGamelog()">Refresh Live Data</button>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr id="gamelogHeader">
-                        <th>DATE</th>
-                        <th>OPP</th>
-                        <th>RESULT</th>
-                        <th>CMP/ATT</th>
-                        <th>YDS</th>
-                        <th>TD</th>
-                        <th>INT</th>
-                        <th>RATING</th>
-                    </tr>
-                </thead>
-                <tbody id="gamelogBody">
-                    <tr><td colspan="8" class="loading">Loading live 2026 stats...</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <div id="playerView" class="view-section">
+            <div class="player-card" id="playerCard">
+                <img src="https://a.espncdn.com/i/headshots/nfl/players/full/3139477.png" alt="Player Headshot" class="player-headshot" id="playerHeadshot">
+                <div class="player-info">
+                    <h1 id="playerName">Patrick Mahomes</h1>
+                    <div class="player-details">
+                        <span id="playerTeam">Kansas City Chiefs</span>
+                        <span>•</span>
+                        <span id="playerPosition">QB</span>
+                        <span>•</span>
+                        <span id="playerNum">#15</span>
+                        <span>•</span>
+                        <span id="playerBio">Age: 30 | 6'2", 225 lbs</span>
+                    </div>
+                </div>
+            </div>
 
-        <div class="section-title">
-            <span>Career Statistics</span>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr id="careerHeader">
-                        <th>YEAR</th>
-                        <th>TEAM</th>
-                        <th>GP</th>
-                        <th>CMP/ATT</th>
-                        <th>YDS</th>
-                        <th>TD</th>
-                        <th>INT</th>
-                        <th>RATING</th>
-                    </tr>
-                </thead>
-                <tbody id="careerBody">
-                    <tr><td colspan="8" class="loading">Loading career statistics...</td></tr>
-                </tbody>
-            </table>
+            <div class="section-title">
+                <span>2026 Season Game Log</span>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr id="gamelogHeader">
+                            <th>DATE</th>
+                            <th>OPP</th>
+                            <th>RESULT</th>
+                            <th>CMP/ATT</th>
+                            <th>YDS</th>
+                            <th>TD</th>
+                            <th>INT</th>
+                            <th>RATING</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gamelogBody">
+                        <tr><td colspan="8" class="loading">Loading live 2026 stats...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section-title">
+                <span>Career Statistics</span>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr id="careerHeader">
+                            <th>YEAR</th>
+                            <th>TEAM</th>
+                            <th>GP</th>
+                            <th>CMP/ATT</th>
+                            <th>YDS</th>
+                            <th>TD</th>
+                            <th>INT</th>
+                            <th>RATING</th>
+                        </tr>
+                    </thead>
+                    <tbody id="careerBody">
+                        <tr><td colspan="8" class="loading">Loading career statistics...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 
     <footer>
-        <p>Live 2026 NFL Data powered by ESPN Public API. Data refreshes automatically.</p>
+        <p>Live 2026 & Historical NFL Data (2000-2026) powered by ESPN API.</p>
     </footer>
 
     <script>
         let currentAthleteId = "3139477"; // Default: Patrick Mahomes
 
+        // Populate Season Selector (2000 to 2026)
+        const seasonSelect = document.getElementById('seasonSelect');
+        for (let year = 2026; year >= 2000; year--) {
+            const opt = document.createElement('option');
+            opt.value = year;
+            opt.textContent = year + (year === 2026 ? " (Current)" : "");
+            seasonSelect.appendChild(opt);
+        }
+
+        // View Navigation Switcher
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(viewId).classList.add('active');
+            if (viewId === 'leagueView') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            }
+        }
+
+        // Search Autocomplete using ESPN Search API
         const searchInput = document.getElementById('searchInput');
         const searchResults = document.getElementById('searchResults');
 
-        // Search Autocomplete using ESPN Search API
         searchInput.addEventListener('input', async (e) => {
             const query = e.target.value.trim();
             if (query.length < 2) {
@@ -391,6 +527,7 @@
                         div.addEventListener('click', () => {
                             currentAthleteId = item.id;
                             loadPlayerData(currentAthleteId);
+                            switchView('playerView');
                             searchResults.style.display = 'none';
                             searchInput.value = '';
                         });
@@ -405,14 +542,62 @@
             }
         });
 
-        // Hide search results on outside click
         document.addEventListener('click', (e) => {
             if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
                 searchResults.style.display = 'none';
             }
         });
 
-        // Load Header & Bio Data
+        // Load League Leaders
+        async function loadLeagueLeaders() {
+            const year = document.getElementById('seasonSelect').value;
+            const posCategory = document.getElementById('positionSelect').value;
+            const tbody = document.getElementById('leaderBody');
+            
+            const posText = document.getElementById('positionSelect').options[document.getElementById('positionSelect').selectedIndex].text;
+            document.getElementById('leaderboardTitle').textContent = `${year} NFL ${posText}`;
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">Fetching league standings...</td></tr>';
+
+            try {
+                const res = await fetch(`https://site.api.espn.com/apis/site/v3/sports/football/nfl/leaders?season=${year}`);
+                const data = await res.json();
+
+                if (!data.leaders) {
+                    tbody.innerHTML = '<tr><td colspan="5">No leader data available for this season.</td></tr>';
+                    return;
+                }
+
+                // Match category split
+                let categoryData = data.leaders.categories.find(c => c.name.toLowerCase().includes(posCategory));
+                if (!categoryData) {
+                    categoryData = data.leaders.categories[0]; // Fallback to first available category
+                }
+
+                tbody.innerHTML = '';
+                categoryData.leaders.forEach((item, index) => {
+                    const athlete = item.athlete;
+                    const tr = document.createElement('tr');
+                    tr.className = 'clickable-row';
+                    tr.innerHTML = `
+                        <td><span class="rank-badge">${index + 1}</span></td>
+                        <td><strong>${athlete.displayName}</strong></td>
+                        <td>${athlete.position ? athlete.position.abbreviation : '-'}</td>
+                        <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
+                        <td><strong>${item.displayValue}</strong></td>
+                    `;
+                    tr.addEventListener('click', () => {
+                        currentAthleteId = athlete.id;
+                        loadPlayerData(athlete.id);
+                        switchView('playerView');
+                    });
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="5">Unable to load league leaders for the selected season.</td></tr>';
+            }
+        }
+
+        // Load Individual Athlete Header & Bio Data
         async function loadPlayerData(athleteId) {
             try {
                 const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/athletes/${athleteId}`);
@@ -453,7 +638,7 @@
                     const stats = event.stats || [];
                     tr.innerHTML = `
                         <td>${new Date(event.gameDate).toLocaleDateString()}</td>
-                        <td>${event.opponent.abbreviation}</td>
+                        <td>${event.opponent ? event.opponent.abbreviation : '-'}</td>
                         <td>${event.gameResult || '-'} ${event.score || ''}</td>
                         <td>${stats[0] || '-'}</td>
                         <td>${stats[1] || '-'}</td>
@@ -478,36 +663,31 @@
                 const data = await res.json();
 
                 tbody.innerHTML = '';
-                if (data.splits && data.splits.categories) {
-                    const generalStats = data.splits.categories.find(c => c.name === 'passing' || c.name === 'rushing' || c.name === 'receiving');
-                    
-                    if (data.splits.seasons) {
-                        data.splits.seasons.forEach(season => {
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `
-                                <td class="season-highlight">${season.year}</td>
-                                <td>${season.team ? season.team.displayName : 'NFL'}</td>
-                                <td>${season.stats ? season.stats[0] : '-'}</td>
-                                <td>${season.stats ? season.stats[1] : '-'}</td>
-                                <td>${season.stats ? season.stats[2] : '-'}</td>
-                                <td>${season.stats ? season.stats[3] : '-'}</td>
-                                <td>${season.stats ? season.stats[4] : '-'}</td>
-                                <td>${season.stats ? season.stats[5] : '-'}</td>
-                            `;
-                            tbody.appendChild(tr);
-                        });
-                    } else {
-                        tbody.innerHTML = '<tr><td colspan="8">Career stats summarized for primary role.</td></tr>';
-                    }
+                if (data.splits && data.splits.seasons) {
+                    data.splits.seasons.forEach(season => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><strong>${season.year}</strong></td>
+                            <td>${season.team ? season.team.displayName : 'NFL'}</td>
+                            <td>${season.stats ? season.stats[0] : '-'}</td>
+                            <td>${season.stats ? season.stats[1] : '-'}</td>
+                            <td>${season.stats ? season.stats[2] : '-'}</td>
+                            <td>${season.stats ? season.stats[3] : '-'}</td>
+                            <td>${season.stats ? season.stats[4] : '-'}</td>
+                            <td>${season.stats ? season.stats[5] : '-'}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="8">No detailed career records available.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8">No detailed career records available for this profile.</td></tr>';
                 }
             } catch (err) {
                 tbody.innerHTML = '<tr><td colspan="8">Career statistics currently unavailable.</td></tr>';
             }
         }
 
-        // Initialize with default player
+        // Initialize App with League Leaders & Default Player Data
+        loadLeagueLeaders();
         loadPlayerData(currentAthleteId);
     </script>
 </body>
