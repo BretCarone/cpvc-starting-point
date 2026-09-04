@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -397,7 +398,7 @@
                         </tr>
                     </thead>
                     <tbody id="leaderBody">
-                        <tr><td colspan="12" class="loading">Loading league leaders...</td></tr>
+                        <tr><td colspan="15" class="loading">Loading league leaders...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -433,6 +434,7 @@
                             <th>RESULT</th>
                             <th>CMP/ATT</th>
                             <th>YDS</th>
+                            <th>Y/A</th>
                             <th>CMP%</th>
                             <th>TD</th>
                             <th>INT</th>
@@ -440,7 +442,7 @@
                         </tr>
                     </thead>
                     <tbody id="gamelogBody">
-                        <tr><td colspan="9" class="loading">Loading live 2026 stats...</td></tr>
+                        <tr><td colspan="10" class="loading">Loading live 2026 stats...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -457,6 +459,7 @@
                             <th>GP</th>
                             <th>CMP/ATT</th>
                             <th>YDS</th>
+                            <th>Y/A</th>
                             <th>CMP%</th>
                             <th>TD</th>
                             <th>INT</th>
@@ -464,7 +467,7 @@
                         </tr>
                     </thead>
                     <tbody id="careerBody">
-                        <tr><td colspan="9" class="loading">Loading career statistics...</td></tr>
+                        <tr><td colspan="10" class="loading">Loading career statistics...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -478,60 +481,92 @@
     <script>
         let currentAthleteId = "3139477"; // Default: Patrick Mahomes
 
-        // Schema definitions for complete positional stat columns
+        // Helper calculation function ensuring no empty cells
+        function calcDiv(num, den) {
+            const n = parseFloat(num);
+            const d = parseFloat(den);
+            if (isNaN(n) || isNaN(d) || d === 0) return "0.0";
+            return (n / d).toFixed(1);
+        }
+
+        function safeVal(val, fallback = "0") {
+            return (val !== undefined && val !== null && val !== "") ? val : fallback;
+        }
+
+        // Schema definitions with explicit Y/A (Yards per Attempt) for Passing & Rushing
         const positionSchemas = {
             passing: {
-                headers: ["RK", "PLAYER", "TEAM", "POS", "CMP", "ATT", "CMP%", "YDS", "AVG", "TD", "INT", "LNG", "FUM", "QBR"],
-                renderRow: (item, idx, athlete) => `
-                    <td><span class="rank-badge">${idx + 1}</span></td>
-                    <td><strong>${athlete.displayName}</strong></td>
-                    <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
-                    <td>${athlete.position ? athlete.position.abbreviation : 'QB'}</td>
-                    <td>${item.stats?.cmp || item.stats?.[0] || '-'}</td>
-                    <td>${item.stats?.att || item.stats?.[1] || '-'}</td>
-                    <td>${item.stats?.cmpPct || item.stats?.[2] || '-'}</td>
-                    <td><strong>${item.stats?.yds || item.displayValue || '-'}</strong></td>
-                    <td>${item.stats?.avg || '-'}</td>
-                    <td>${item.stats?.td || '-'}</td>
-                    <td>${item.stats?.int || '-'}</td>
-                    <td>${item.stats?.lng || '-'}</td>
-                    <td>${item.stats?.fum || '0'}</td>
-                    <td>${item.stats?.rating || '-'}</td>
-                `
+                headers: ["RK", "PLAYER", "TEAM", "POS", "CMP", "ATT", "YDS", "Y/A", "CMP%", "TD", "INT", "LNG", "FUM", "QBR"],
+                renderRow: (item, idx, athlete) => {
+                    const cmp = safeVal(item.stats?.cmp || item.stats?.[0]);
+                    const att = safeVal(item.stats?.att || item.stats?.[1]);
+                    const yds = safeVal(item.stats?.yds || item.displayValue);
+                    const ya = item.stats?.ya || item.stats?.ypa || calcDiv(yds, att);
+                    const cmpPct = item.stats?.cmpPct || calcDiv(cmp * 100, att);
+
+                    return `
+                        <td><span class="rank-badge">${idx + 1}</span></td>
+                        <td><strong>${athlete.displayName}</strong></td>
+                        <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
+                        <td>${athlete.position ? athlete.position.abbreviation : 'QB'}</td>
+                        <td>${cmp}</td>
+                        <td>${att}</td>
+                        <td><strong>${yds}</strong></td>
+                        <td><strong>${ya}</strong></td>
+                        <td>${cmpPct}%</td>
+                        <td>${safeVal(item.stats?.td)}</td>
+                        <td>${safeVal(item.stats?.int)}</td>
+                        <td>${safeVal(item.stats?.lng)}</td>
+                        <td>${safeVal(item.stats?.fum)}</td>
+                        <td>${safeVal(item.stats?.rating || item.stats?.qbr)}</td>
+                    `;
+                }
             },
             rushing: {
-                headers: ["RK", "PLAYER", "TEAM", "POS", "ATT", "YDS", "AVG", "TD", "LNG", "FUM", "FUM-LOST", "YDS/G"],
-                renderRow: (item, idx, athlete) => `
-                    <td><span class="rank-badge">${idx + 1}</span></td>
-                    <td><strong>${athlete.displayName}</strong></td>
-                    <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
-                    <td>${athlete.position ? athlete.position.abbreviation : 'RB'}</td>
-                    <td>${item.stats?.att || '-'}</td>
-                    <td><strong>${item.stats?.yds || item.displayValue || '-'}</strong></td>
-                    <td>${item.stats?.avg || '-'}</td>
-                    <td>${item.stats?.td || '-'}</td>
-                    <td>${item.stats?.lng || '-'}</td>
-                    <td>${item.stats?.fum || '0'}</td>
-                    <td>${item.stats?.lst || '0'}</td>
-                    <td>${item.stats?.ypg || '-'}</td>
-                `
+                headers: ["RK", "PLAYER", "TEAM", "POS", "ATT", "YDS", "Y/A", "TD", "LNG", "FUM", "FUM-LOST", "YDS/G"],
+                renderRow: (item, idx, athlete) => {
+                    const att = safeVal(item.stats?.att || item.stats?.[0]);
+                    const yds = safeVal(item.stats?.yds || item.displayValue);
+                    const ya = item.stats?.avg || item.stats?.ya || calcDiv(yds, att);
+
+                    return `
+                        <td><span class="rank-badge">${idx + 1}</span></td>
+                        <td><strong>${athlete.displayName}</strong></td>
+                        <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
+                        <td>${athlete.position ? athlete.position.abbreviation : 'RB'}</td>
+                        <td>${att}</td>
+                        <td><strong>${yds}</strong></td>
+                        <td><strong>${ya}</strong></td>
+                        <td>${safeVal(item.stats?.td)}</td>
+                        <td>${safeVal(item.stats?.lng)}</td>
+                        <td>${safeVal(item.stats?.fum)}</td>
+                        <td>${safeVal(item.stats?.lst)}</td>
+                        <td>${safeVal(item.stats?.ypg)}</td>
+                    `;
+                }
             },
             receiving: {
                 headers: ["RK", "PLAYER", "TEAM", "POS", "REC", "TGTS", "YDS", "AVG", "TD", "LNG", "FUM", "YDS/G"],
-                renderRow: (item, idx, athlete) => `
-                    <td><span class="rank-badge">${idx + 1}</span></td>
-                    <td><strong>${athlete.displayName}</strong></td>
-                    <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
-                    <td>${athlete.position ? athlete.position.abbreviation : 'WR'}</td>
-                    <td>${item.stats?.rec || '-'}</td>
-                    <td>${item.stats?.tgts || '-'}</td>
-                    <td><strong>${item.stats?.yds || item.displayValue || '-'}</strong></td>
-                    <td>${item.stats?.avg || '-'}</td>
-                    <td>${item.stats?.td || '-'}</td>
-                    <td>${item.stats?.lng || '-'}</td>
-                    <td>${item.stats?.fum || '0'}</td>
-                    <td>${item.stats?.ypg || '-'}</td>
-                `
+                renderRow: (item, idx, athlete) => {
+                    const rec = safeVal(item.stats?.rec);
+                    const yds = safeVal(item.stats?.yds || item.displayValue);
+                    const avg = item.stats?.avg || calcDiv(yds, rec);
+
+                    return `
+                        <td><span class="rank-badge">${idx + 1}</span></td>
+                        <td><strong>${athlete.displayName}</strong></td>
+                        <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
+                        <td>${athlete.position ? athlete.position.abbreviation : 'WR'}</td>
+                        <td>${rec}</td>
+                        <td>${safeVal(item.stats?.tgts)}</td>
+                        <td><strong>${yds}</strong></td>
+                        <td>${avg}</td>
+                        <td>${safeVal(item.stats?.td)}</td>
+                        <td>${safeVal(item.stats?.lng)}</td>
+                        <td>${safeVal(item.stats?.fum)}</td>
+                        <td>${safeVal(item.stats?.ypg)}</td>
+                    `;
+                }
             },
             defensive: {
                 headers: ["RK", "PLAYER", "TEAM", "POS", "TOT TAC", "SOLO", "AST", "SACK", "TFL", "QB HITS", "FF", "FR"],
@@ -540,14 +575,14 @@
                     <td><strong>${athlete.displayName}</strong></td>
                     <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
                     <td>${athlete.position ? athlete.position.abbreviation : 'LB'}</td>
-                    <td><strong>${item.stats?.tot || item.displayValue || '-'}</strong></td>
-                    <td>${item.stats?.solo || '-'}</td>
-                    <td>${item.stats?.ast || '-'}</td>
-                    <td>${item.stats?.sack || '-'}</td>
-                    <td>${item.stats?.tfl || '-'}</td>
-                    <td>${item.stats?.qbh || '-'}</td>
-                    <td>${item.stats?.ff || '0'}</td>
-                    <td>${item.stats?.fr || '0'}</td>
+                    <td><strong>${safeVal(item.stats?.tot || item.displayValue)}</strong></td>
+                    <td>${safeVal(item.stats?.solo)}</td>
+                    <td>${safeVal(item.stats?.ast)}</td>
+                    <td>${safeVal(item.stats?.sack)}</td>
+                    <td>${safeVal(item.stats?.tfl)}</td>
+                    <td>${safeVal(item.stats?.qbh)}</td>
+                    <td>${safeVal(item.stats?.ff)}</td>
+                    <td>${safeVal(item.stats?.fr)}</td>
                 `
             },
             interceptions: {
@@ -557,12 +592,12 @@
                     <td><strong>${athlete.displayName}</strong></td>
                     <td>${athlete.team ? athlete.team.abbreviation : 'FA'}</td>
                     <td>${athlete.position ? athlete.position.abbreviation : 'DB'}</td>
-                    <td><strong>${item.stats?.int || item.displayValue || '-'}</strong></td>
-                    <td>${item.stats?.yds || '-'}</td>
-                    <td>${item.stats?.td || '-'}</td>
-                    <td>${item.stats?.lng || '-'}</td>
-                    <td>${item.stats?.pd || '-'}</td>
-                    <td>${item.stats?.ff || '0'}</td>
+                    <td><strong>${safeVal(item.stats?.int || item.displayValue)}</strong></td>
+                    <td>${safeVal(item.stats?.yds)}</td>
+                    <td>${safeVal(item.stats?.td)}</td>
+                    <td>${safeVal(item.stats?.lng)}</td>
+                    <td>${safeVal(item.stats?.pd)}</td>
+                    <td>${safeVal(item.stats?.ff)}</td>
                 `
             }
         };
@@ -647,7 +682,6 @@
             
             const schema = positionSchemas[posCategory] || positionSchemas.passing;
 
-            // Render headers dynamically based on position category
             theadTr.innerHTML = schema.headers.map(h => `<th>${h}</th>`).join('');
 
             const posText = document.getElementById('positionSelect').options[document.getElementById('positionSelect').selectedIndex].text;
@@ -711,14 +745,14 @@
         // Fetch 2026 Game Log
         async function fetchPlayerGamelog(athleteId = currentAthleteId) {
             const tbody = document.getElementById('gamelogBody');
-            tbody.innerHTML = '<tr><td colspan="9" class="loading">Fetching live game logs...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="loading">Fetching live game logs...</td></tr>';
 
             try {
                 const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/athletes/${athleteId}/gamelog`);
                 const data = await res.json();
 
                 if (!data.events || data.events.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9">No 2026 game data recorded yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="10">2026 season has not started yet or no game data recorded.</td></tr>';
                     return;
                 }
 
@@ -726,55 +760,69 @@
                 data.events.forEach(event => {
                     const tr = document.createElement('tr');
                     const stats = event.stats || [];
+                    const cmpAtt = stats[0] || "0/0";
+                    const [cmp, att] = cmpAtt.split('/');
+                    const yds = stats[1] || "0";
+                    const ya = calcDiv(yds, att);
+
                     tr.innerHTML = `
                         <td>${new Date(event.gameDate).toLocaleDateString()}</td>
                         <td>${event.opponent ? event.opponent.abbreviation : '-'}</td>
                         <td>${event.gameResult || '-'} ${event.score || ''}</td>
-                        <td>${stats[0] || '-'}</td>
-                        <td>${stats[1] || '-'}</td>
-                        <td>${stats[2] || '-'}%</td>
-                        <td>${stats[3] || '-'}</td>
-                        <td>${stats[4] || '-'}</td>
-                        <td>${stats[5] || '-'}</td>
+                        <td>${cmpAtt}</td>
+                        <td><strong>${yds}</strong></td>
+                        <td><strong>${ya}</strong></td>
+                        <td>${stats[2] || '0'}%</td>
+                        <td>${stats[3] || '0'}</td>
+                        <td>${stats[4] || '0'}</td>
+                        <td>${stats[5] || '0'}</td>
                     `;
                     tbody.appendChild(tr);
                 });
             } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="9">Unable to fetch live game logs.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10">2026 season has not started yet or data is pending.</td></tr>';
             }
         }
 
-        // Fetch Full Career Stats with Team Tracking
+        // Fetch Full Career Stats with Team Tracking & Y/A
         async function fetchPlayerCareer(athleteId = currentAthleteId) {
             const tbody = document.getElementById('careerBody');
-            tbody.innerHTML = '<tr><td colspan="9" class="loading">Loading career stats...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" class="loading">Loading career stats...</td></tr>';
 
             try {
                 const res = await fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/athletes/${athleteId}/statistics`);
                 const data = await res.json();
 
                 tbody.innerHTML = '';
-                if (data.splits && data.splits.seasons) {
+                if (data.splits && data.splits.seasons && data.splits.seasons.length > 0) {
                     data.splits.seasons.forEach(season => {
                         const tr = document.createElement('tr');
+                        const stats = season.stats || [];
+                        
+                        const cmpAtt = safeVal(stats[1], "0/0");
+                        const [cmp, att] = cmpAtt.split('/');
+                        const yds = safeVal(stats[2], "0");
+                        const ya = calcDiv(yds, att);
+
                         tr.innerHTML = `
                             <td><strong>${season.year}</strong></td>
-                            <td>${season.team ? season.team.displayName : 'NFL'}</td>
-                            <td>${season.stats ? season.stats[0] : '-'}</td>
-                            <td>${season.stats ? season.stats[1] : '-'}</td>
-                            <td>${season.stats ? season.stats[2] : '-'}</td>
-                            <td>${season.stats ? season.stats[3] : '-'}%</td>
-                            <td>${season.stats ? season.stats[4] : '-'}</td>
-                            <td>${season.stats ? season.stats[5] : '-'}</td>
-                            <td>${season.stats ? season.stats[6] : '-'}</td>
+                            <td>${season.team ? season.team.displayName : 'NFL Team'}</td>
+                            <td>${safeVal(stats[0])}</td>
+                            <td>${cmpAtt}</td>
+                            <td><strong>${yds}</strong></td>
+                            <td><strong>${ya}</strong></td>
+                            <td>${safeVal(stats[3])}%</td>
+                            <td>${safeVal(stats[4])}</td>
+                            <td>${safeVal(stats[5])}</td>
+                            <td>${safeVal(stats[6])}</td>
                         `;
                         tbody.appendChild(tr);
                     });
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="9">No detailed career records available for this profile.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="10">No career statistics available for this player.</td></tr>';
                 }
             } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="9">Career statistics currently unavailable.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10">Career statistics currently unavailable.</td></tr>';
             }
         }
 
@@ -784,3 +832,5 @@
     </script>
 </body>
 </html>
+
+```
