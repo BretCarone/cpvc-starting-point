@@ -1525,6 +1525,8 @@
                     if (state.category === 'defensive' && ['forcedFumbles', 'fumbleRecoveries'].includes(column.id)) sourceCategory = 'general';
                     const sourceName = column.id === 'forcedFumbles' ? 'fumblesForced'
                         : column.id === 'fumbleRecoveries' ? 'fumblesRecovered'
+                        : column.id === 'attempts' ? 'passingAttempts'
+                        : column.id === 'passerRating' ? 'quarterbackRating'
                         : column.id;
                     stats[column.id] = categoryStats[sourceCategory]?.[sourceName];
                 });
